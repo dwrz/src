@@ -20,6 +20,7 @@ func (e *Editor) render(msg *Message) error {
 
 	var (
 		buf    bytes.Buffer
+		cursor = e.active.Cursor()
 		bars   = 2
 		height = int(size.Rows) - bars
 		width  = int(size.Columns)
@@ -39,7 +40,7 @@ func (e *Editor) render(msg *Message) error {
 
 	// Draw the status bar.
 	buf.Write([]byte(terminal.EraseLine))
-	buf.WriteString(e.statusBar(width, output.Line, output.Glyph))
+	buf.WriteString(e.statusBar(width, cursor.Line(), cursor.Glyph()))
 	buf.WriteString("\r\n")
 
 	// Draw the message bar.
