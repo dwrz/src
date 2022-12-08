@@ -5,13 +5,12 @@ import (
 	"time"
 
 	"code.dwrz.net/src/pkg/build"
-	"code.dwrz.net/src/pkg/terminal"
 	"code.dwrz.net/src/pkg/editor/message"
 )
 
 func (e *Editor) Run(files []string) error {
 	e.terminal.SetRaw()
-	e.out.Write([]byte(terminal.ClearScreen))
+	e.canvas.Reset()
 
 	// Log build info.
 	e.log.Debug.Printf(
@@ -42,7 +41,7 @@ func (e *Editor) Run(files []string) error {
 
 		case msg := <-e.messages:
 			e.log.Debug.Printf("%s", msg.Text)
-			if err := e.render(&msg); err != nil {
+			if err := e.canvas.Render(e.active, msg); err != nil {
 				return fmt.Errorf("failed to render: %w", err)
 			}
 
@@ -55,7 +54,7 @@ func (e *Editor) Run(files []string) error {
 					"failed to process input: %w", err,
 				)
 			}
-			if err := e.render(nil); err != nil {
+			if err := e.canvas.Render(e.active, nil); err != nil {
 				return fmt.Errorf("failed to render: %w", err)
 			}
 		}
