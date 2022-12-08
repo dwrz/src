@@ -6,6 +6,7 @@ import (
 
 	"code.dwrz.net/src/pkg/build"
 	"code.dwrz.net/src/pkg/terminal"
+	"code.dwrz.net/src/pkg/editor/message"
 )
 
 func (e *Editor) Run(files []string) error {
@@ -30,7 +31,7 @@ func (e *Editor) Run(files []string) error {
 	// Set the initial message.
 	go func() {
 		time.Sleep(1 * time.Second)
-		e.messages <- Message{Text: "Ctrl-Q: Quit"}
+		e.messages <- message.New("Ctrl-Q: Quit")
 	}()
 
 	// Main loop.

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"code.dwrz.net/src/pkg/editor/buffer"
+	"code.dwrz.net/src/pkg/editor/message"
 	"code.dwrz.net/src/pkg/log"
 	"code.dwrz.net/src/pkg/terminal"
 )
@@ -15,8 +16,8 @@ type Editor struct {
 	in       *os.File
 	input    chan input
 	log      *log.Logger
-	messages chan Message
 	out      *os.File
+	messages chan *message.Message
 	terminal *terminal.Terminal
 	tmpdir   string
 
@@ -40,8 +41,8 @@ func New(p Parameters) (*Editor, error) {
 		in:       p.In,
 		input:    make(chan input),
 		log:      p.Log,
-		messages: make(chan Message),
 		out:      p.Out,
+		messages: make(chan *message.Message),
 		terminal: p.Terminal,
 		tmpdir:   p.TempDir,
 	}

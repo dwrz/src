@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"code.dwrz.net/src/pkg/editor/buffer"
+	"code.dwrz.net/src/pkg/editor/message"
 )
 
 // load files into editor buffers.
@@ -43,12 +44,10 @@ func (e *Editor) load(files []string) {
 		}
 		// If there was an error, report it to the user.
 		if err != nil {
-			e.messages <- Message{
-				Text: fmt.Sprintf(
-					"failed to load buffer %s: %v",
-					name, err,
-				),
-			}
+			e.messages <- message.New(fmt.Sprintf(
+				"failed to load buffer %s: %v",
+				name, err,
+			))
 			continue
 		}
 
@@ -61,7 +60,7 @@ func (e *Editor) load(files []string) {
 		}
 	}
 
-	e.messages <- Message{Text: "loaded buffers"}
+	e.messages <- message.New("loaded buffers")
 }
 
 // setBuffer stores a buffer in the editor's buffer map.

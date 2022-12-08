@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"code.dwrz.net/src/pkg/editor/message"
 	"code.dwrz.net/src/pkg/terminal"
 )
 
@@ -254,17 +255,13 @@ func (e *Editor) processInput(input input) error {
 	case Save:
 		if err := e.active.Save(); err != nil {
 			go func() {
-				e.messages <- Message{
-					Text: fmt.Sprintf(
-						"failed to save: %v", err,
-					),
-				}
+				e.messages <- message.New(fmt.Sprintf(
+					"failed to save: %v", err,
+				))
 			}()
 		}
 		go func() {
-			e.messages <- Message{
-				Text: fmt.Sprintf("saved file"),
-			}
+			e.messages <- message.New("saved file")
 		}()
 
 	default:
