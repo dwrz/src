@@ -48,7 +48,7 @@ func New(p Parameters) (*Editor, error) {
 
 	// Create the initial scratch buffer.
 	scratch, err := buffer.Create(buffer.NewBufferParams{
-		Name: editor.tmpdir + "scratch",
+		Name: editor.tmpdir + "/scratch",
 		Log:  editor.log,
 	})
 	if err != nil {

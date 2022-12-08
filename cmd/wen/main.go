@@ -42,6 +42,7 @@ func main() {
 		In:       os.Stdin,
 		Log:      log.New(f),
 		Out:      os.Stdout,
+		TempDir:  wdir,
 		Terminal: t,
 	})
 	if err != nil {
