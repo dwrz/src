@@ -44,7 +44,7 @@ func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
 
 	// Set the cursor.
 	c.buf.Write([]byte(fmt.Sprintf(
-		terminal.SetCursorFmt, cursor.Line(), cursor.Glyph(),
+		terminal.SetCursorFmt, output.Line, output.Glyph,
 	)))
 	c.buf.Write([]byte(terminal.CursorShow))
 
