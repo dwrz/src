@@ -39,7 +39,9 @@ func New(p Parameters) (*Editor, error) {
 	var editor = &Editor{
 		buffers: map[string]*buffer.Buffer{},
 		canvas: canvas.New(canvas.Parameters{
-			Out: p.Out, Terminal: p.Terminal,
+			Log:      p.Log,
+			Out:      p.Out,
+			Terminal: p.Terminal,
 		}),
 		errs:     make(chan error),
 		in:       p.In,

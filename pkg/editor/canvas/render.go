@@ -12,6 +12,9 @@ import (
 )
 
 func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	size, err := c.terminal.Size()
 	if err != nil {
 		return fmt.Errorf("failed to get terminal size: %w", err)
@@ -50,10 +53,11 @@ func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
 
 	c.out.Write(c.buf.Bytes())
 
+	c.buf.Reset()
+
 	return nil
 }
 
-// TODO: show a character cursor, not the terminal cursor.
 func (c *Canvas) statusBar(b *buffer.Buffer, width, y, x int) {
 	c.buf.Write([]byte(terminal.EraseLine))
 	c.buf.WriteString(color.Inverse)
