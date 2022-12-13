@@ -75,18 +75,18 @@ func main() {
 			volume.New(),
 			mic.New(),
 			datetime.New(datetime.Parameters{
-				Format:   "+%d %H:%M %Z",
-				Label:    "NYC",
+				Format:   "+%d %H:%M",
+				Label:    "🇺🇸",
 				Timezone: "America/New_York",
 			}),
 			datetime.New(datetime.Parameters{
-				Format:   "+%d %H:%M %Z",
-				Label:    "Napoli",
+				Format:   "+%d %H:%M",
+				Label:    "🇮🇹",
 				Timezone: "Europe/Rome",
 			}),
 			datetime.New(datetime.Parameters{
-				Format:   "+%d %H:%M %Z",
-				Label:    "上海",
+				Format:   "+%d %H:%M",
+				Label:    "🇨🇳",
 				Timezone: "Asia/Shanghai",
 			}),
 			datetime.New(datetime.Parameters{
