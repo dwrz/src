@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"code.dwrz.net/src/pkg/editor/buffer"
 	"code.dwrz.net/src/pkg/editor/message"
@@ -61,6 +62,12 @@ func (e *Editor) load(files []string) {
 	}
 
 	e.messages <- message.New("loaded buffers")
+
+	// Set the initial message.
+	go func() {
+		time.Sleep(1 * time.Second)
+		e.messages <- message.New("Ctrl-Q: Quit")
+	}()
 }
 
 // setBuffer stores a buffer in the editor's buffer map.

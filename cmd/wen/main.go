@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"code.dwrz.net/src/pkg/editor"
 	"code.dwrz.net/src/pkg/log"
@@ -11,6 +14,9 @@ import (
 
 func main() {
 	var l = log.New(os.Stderr)
+
+	// Setup the main context.
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Setup workspace and log file.
 	cdir, err := os.UserCacheDir()
@@ -49,10 +55,20 @@ func main() {
 		l.Error.Fatalf("failed to create editor: %v", err)
 	}
 
-	// TODO: handle signals, sigwinch.
+	// TODO: refactor; handle sigwinch.
+	go func() {
+		var signals = make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
+
+		// Block until we receive a signal.
+		s := <-signals
+		l.Debug.Printf("received signal: %s", s)
+
+		cancel()
+	}()
 
 	// Run the editor.
-	if err := editor.Run(os.Args[1:]); err != nil {
+	if err := editor.Run(ctx, os.Args[1:]); err != nil {
 		l.Error.Fatal(err)
 	}
 }

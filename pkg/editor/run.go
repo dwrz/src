@@ -1,14 +1,14 @@
 package editor
 
 import (
+	"context"
 	"fmt"
-	"time"
 
 	"code.dwrz.net/src/pkg/build"
-	"code.dwrz.net/src/pkg/editor/message"
+	"code.dwrz.net/src/pkg/editor/command"
 )
 
-func (e *Editor) Run(files []string) error {
+func (e *Editor) Run(ctx context.Context, files []string) error {
 	e.terminal.SetRaw()
 	e.canvas.Reset()
 
@@ -22,20 +22,22 @@ func (e *Editor) Run(files []string) error {
 	defer e.quit()
 
 	// Start reading user input.
-	go e.readInput()
-
-	// Open all the files.
-	go e.load(files)
-
-	// Set the initial message.
 	go func() {
-		time.Sleep(1 * time.Second)
-		e.messages <- message.New("Ctrl-Q: Quit")
+		if err := e.reader.Run(); err != nil {
+			e.errs <- err
+		}
 	}()
+
+	// Open the files.
+	go e.load(files)
 
 	// Main loop.
 	for {
 		select {
+		case <-ctx.Done():
+			e.log.Debug.Printf("context done: stopping")
+			return nil
+
 		case err := <-e.errs:
 			return err
 
@@ -46,10 +48,10 @@ func (e *Editor) Run(files []string) error {
 			}
 
 		case input := <-e.input:
-			if input.Command == Quit {
+			if input.Command == command.Quit {
 				return nil
 			}
-			if err := e.processInput(input); err != nil {
+			if err := e.bufferInput(input); err != nil {
 				return fmt.Errorf(
 					"failed to process input: %w", err,
 				)

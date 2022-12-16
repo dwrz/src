@@ -7,6 +7,7 @@ import (
 
 	"code.dwrz.net/src/pkg/editor/buffer"
 	"code.dwrz.net/src/pkg/editor/canvas"
+	"code.dwrz.net/src/pkg/editor/input"
 	"code.dwrz.net/src/pkg/editor/message"
 	"code.dwrz.net/src/pkg/log"
 	"code.dwrz.net/src/pkg/terminal"
@@ -15,10 +16,10 @@ import (
 type Editor struct {
 	canvas   *canvas.Canvas
 	errs     chan error
-	in       *os.File
-	input    chan input
+	input    chan *input.Event
 	log      *log.Logger
 	messages chan *message.Message
+	reader   *input.Reader
 	terminal *terminal.Terminal
 	tmpdir   string
 
@@ -37,20 +38,28 @@ type Parameters struct {
 
 func New(p Parameters) (*Editor, error) {
 	var editor = &Editor{
-		buffers: map[string]*buffer.Buffer{},
-		canvas: canvas.New(canvas.Parameters{
-			Log:      p.Log,
-			Out:      p.Out,
-			Terminal: p.Terminal,
-		}),
+		buffers:  map[string]*buffer.Buffer{},
 		errs:     make(chan error),
-		in:       p.In,
-		input:    make(chan input),
+		input:    make(chan *input.Event),
 		log:      p.Log,
 		messages: make(chan *message.Message),
 		terminal: p.Terminal,
 		tmpdir:   p.TempDir,
 	}
+
+	// Setup user input.
+	editor.reader = input.New(input.Parameters{
+		Chan: editor.input,
+		In:   p.In,
+		Log:  p.Log,
+	})
+
+	// Setup the canvas.
+	editor.canvas = canvas.New(canvas.Parameters{
+		Log:      p.Log,
+		Out:      p.Out,
+		Terminal: p.Terminal,
+	})
 
 	// Create the initial scratch buffer.
 	scratch, err := buffer.Create(buffer.NewBufferParams{
