@@ -29,12 +29,12 @@ func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
 	)
 
 	// Move the cursor to the top left.
-	c.buf.Write([]byte(terminal.CursorHide))
-	c.buf.Write([]byte(terminal.CursorTopLeft))
+	c.buf.WriteString(terminal.CursorHide)
+	c.buf.WriteString(terminal.CursorTopLeft)
 
 	// Print each line.
 	for _, line := range output.Lines {
-		c.buf.Write([]byte(terminal.EraseLine))
+		c.buf.WriteString(terminal.EraseLine)
 		c.buf.WriteString(line)
 		c.buf.WriteString("\r\n")
 	}
@@ -46,10 +46,10 @@ func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
 	c.messageBar(msg, width)
 
 	// Set the cursor.
-	c.buf.Write([]byte(fmt.Sprintf(
+	c.buf.WriteString(fmt.Sprintf(
 		terminal.SetCursorFmt, output.Line, output.Glyph,
-	)))
-	c.buf.Write([]byte(terminal.CursorShow))
+	))
+	c.buf.WriteString(terminal.CursorShow)
 
 	c.out.Write(c.buf.Bytes())
 
@@ -59,7 +59,7 @@ func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
 }
 
 func (c *Canvas) statusBar(b *buffer.Buffer, width, y, x int) {
-	c.buf.Write([]byte(terminal.EraseLine))
+	c.buf.WriteString(terminal.EraseLine)
 	c.buf.WriteString(color.Inverse)
 
 	// Icon
@@ -105,7 +105,7 @@ func (c *Canvas) statusBar(b *buffer.Buffer, width, y, x int) {
 
 // TODO: handle messages that are too long for one line.
 func (c *Canvas) messageBar(msg *message.Message, width int) {
-	c.buf.Write([]byte(terminal.EraseLine))
+	c.buf.WriteString(terminal.EraseLine)
 	switch {
 	case msg == nil:
 		c.buf.WriteString(fmt.Sprintf("%*s", width, " "))
