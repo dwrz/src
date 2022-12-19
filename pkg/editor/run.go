@@ -5,11 +5,13 @@ import (
 	"fmt"
 
 	"code.dwrz.net/src/pkg/build"
-	"code.dwrz.net/src/pkg/editor/command"
+	"code.dwrz.net/src/pkg/terminal/input"
 )
 
 func (e *Editor) Run(ctx context.Context, files []string) error {
-	e.terminal.SetRaw()
+	if err := e.terminal.SetRaw(); err != nil {
+		return fmt.Errorf("failed to set raw mode: %w", err)
+	}
 	e.canvas.Reset()
 
 	// Log build info.
@@ -23,7 +25,7 @@ func (e *Editor) Run(ctx context.Context, files []string) error {
 
 	// Start reading user input.
 	go func() {
-		if err := e.reader.Run(); err != nil {
+		if err := e.reader.Run(ctx); err != nil {
 			e.errs <- err
 		}
 	}()
@@ -47,11 +49,11 @@ func (e *Editor) Run(ctx context.Context, files []string) error {
 				return fmt.Errorf("failed to render: %w", err)
 			}
 
-		case input := <-e.input:
-			if input.Command == command.Quit {
+		case event := <-e.input:
+			if event.Rune == 'q'&input.Control {
 				return nil
 			}
-			if err := e.bufferInput(input); err != nil {
+			if err := e.bufferInput(event); err != nil {
 				return fmt.Errorf(
 					"failed to process input: %w", err,
 				)

@@ -3,74 +3,80 @@ package editor
 import (
 	"fmt"
 
-	"code.dwrz.net/src/pkg/editor/command"
-	"code.dwrz.net/src/pkg/editor/input"
 	"code.dwrz.net/src/pkg/editor/message"
+	"code.dwrz.net/src/pkg/terminal/input"
 )
 
-func (e *Editor) bufferInput(input *input.Event) error {
+func (e *Editor) bufferInput(event *input.Event) error {
 	size, err := e.terminal.Size()
 	if err != nil {
 		return fmt.Errorf("failed to get terminal size: %w", err)
 	}
 
-	switch input.Command {
-	case command.Backspace:
-		e.active.Backspace()
+	if event.Rune != input.Null {
+		switch event.Rune {
+		case input.Delete:
+			e.active.Backspace()
 
-	case command.CursorDown:
+		case 's' & input.Control:
+			// Get the filename.
+			if err := e.active.Save(); err != nil {
+				go func() {
+					e.messages <- message.New(fmt.Sprintf(
+						"failed to save: %v", err,
+					))
+				}()
+			}
+			go func() {
+				e.messages <- message.New("saved file")
+			}()
+
+		default:
+			e.active.Insert(event.Rune)
+		}
+
+		return nil
+	}
+
+	switch event.Key {
+	case input.Down:
 		e.active.CursorDown()
 
-	case command.CursorLeft:
+	case input.Left:
 		e.active.CursorLeft()
 
-	case command.CursorRight:
+	case input.Right:
 		e.active.CursorRight()
 
-	case command.CursorUp:
+	case input.Up:
 		e.active.CursorUp()
 
-	case command.Insert:
-		e.active.Insert(input.Rune)
+	case input.Insert:
 
-	case command.End:
+	case input.End:
 		e.active.CursorEnd()
 
-	case command.Home:
+	case input.Home:
 		e.active.CursorHome()
 
-	case command.PageDown:
+	case input.PageDown:
 		e.active.PageDown(int(size.Rows))
 
-	case command.PageUp:
+	case input.PageUp:
 		e.active.PageUp(int(size.Rows))
 
-	case command.Save:
-		// Get the filename.
-		if err := e.active.Save(); err != nil {
-			go func() {
-				e.messages <- message.New(fmt.Sprintf(
-					"failed to save: %v", err,
-				))
-			}()
-		}
-		go func() {
-			e.messages <- message.New("saved file")
-		}()
-
 	default:
-		e.log.Debug.Printf("unrecognized input: %#v", input)
+		e.log.Debug.Printf("unrecognized input: %#v", event)
 	}
 
 	return nil
 }
 
-func (e *Editor) promptInput(input *input.Event) error {
-	switch input.Command {
-	case command.Backspace:
+func (e *Editor) promptInput(event *input.Event) error {
+	switch event.Key {
 
 	default:
-		e.log.Debug.Printf("unrecognized input: %#v", input)
+		e.log.Debug.Printf("unrecognized input: %#v", event)
 	}
 
 	// If a newline was received, take the input.

@@ -1,4 +1,20 @@
-package terminal
+package input
+
+type Key uint8
+
+const (
+	Down Key = iota + 1
+	Left
+	Right
+	Up
+	End
+	Home
+	Insert
+	PageDown
+	PageUp
+)
+
+const Control rune = 0x1f
 
 const (
 	// Control Characters
@@ -133,5 +149,3 @@ const (
 	Tilde            rune = 126
 	Delete           rune = 127
 )
-
-const Control = 0x1f

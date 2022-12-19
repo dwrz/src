@@ -7,10 +7,10 @@ import (
 
 	"code.dwrz.net/src/pkg/editor/buffer"
 	"code.dwrz.net/src/pkg/editor/canvas"
-	"code.dwrz.net/src/pkg/editor/input"
 	"code.dwrz.net/src/pkg/editor/message"
 	"code.dwrz.net/src/pkg/log"
 	"code.dwrz.net/src/pkg/terminal"
+	"code.dwrz.net/src/pkg/terminal/input"
 )
 
 type Editor struct {

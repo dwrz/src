@@ -2,18 +2,17 @@ package input
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"unicode/utf8"
 
-	"code.dwrz.net/src/pkg/editor/command"
 	"code.dwrz.net/src/pkg/log"
-	"code.dwrz.net/src/pkg/terminal"
 )
 
 type Event struct {
-	Command command.Command
-	Rune    rune
+	Key  Key
+	Rune rune
 }
 
 type Reader struct {
@@ -40,39 +39,37 @@ func New(p Parameters) *Reader {
 // quantities of text into the active buffer. It would be nice to take more
 // input at once, while still being able to handle escape sequences without
 // too many edge cases.
-func (i *Reader) Run() error {
+func (i *Reader) Run(ctx context.Context) error {
 	for {
-		r, size, err := i.buf.ReadRune()
-		if err != nil {
-			return fmt.Errorf("failed to read: %w", err)
-		}
-		i.log.Debug.Printf(
-			"read rune %s %v (%d)",
-			string(r), []byte(string(r)), size,
-		)
-		switch r {
-		case utf8.RuneError:
-			i.log.Error.Printf(
-				"rune error: %s (%d)", string(r), size,
-			)
-
-		// Handle escape sequences.
-		case terminal.Escape:
-			if err := i.parseEscapeSequence(); err != nil {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			r, size, err := i.buf.ReadRune()
+			if err != nil {
 				return fmt.Errorf("failed to read: %w", err)
 			}
+			i.log.Debug.Printf(
+				"read rune %s %v (%d)",
+				string(r), []byte(string(r)), size,
+			)
+			switch r {
+			case utf8.RuneError:
+				i.log.Error.Printf(
+					"rune error: %s (%d)", string(r), size,
+				)
 
-		case terminal.Delete:
-			i.events <- &Event{Command: command.Backspace}
+				// Handle escape sequences.
+			case Escape:
+				if err := i.parseEscapeSequence(); err != nil {
+					return fmt.Errorf(
+						"failed to read: %w", err,
+					)
+				}
 
-		case 'q' & terminal.Control:
-			i.events <- &Event{Command: command.Quit}
-
-		case 's' & terminal.Control:
-			i.events <- &Event{Command: command.Save}
-
-		default:
-			i.events <- &Event{Command: command.Insert, Rune: r}
+			default:
+				i.events <- &Event{Rune: r}
+			}
 		}
 	}
 }
@@ -85,7 +82,7 @@ func (i *Reader) parseEscapeSequence() error {
 
 	// Ignore invalid escape sequences.
 	if r1 != '[' && r1 != 'O' {
-		i.events <- &Event{Command: command.Insert, Rune: r1}
+		i.events <- &Event{Rune: r1}
 		return nil
 	}
 
@@ -100,16 +97,16 @@ func (i *Reader) parseEscapeSequence() error {
 	// Check letter escape sequences.
 	switch r2 {
 	case 'A':
-		i.events <- &Event{Command: command.CursorUp}
+		i.events <- &Event{Key: Up}
 		return nil
 	case 'B':
-		i.events <- &Event{Command: command.CursorDown}
+		i.events <- &Event{Key: Down}
 		return nil
 	case 'C':
-		i.events <- &Event{Command: command.CursorRight}
+		i.events <- &Event{Key: Right}
 		return nil
 	case 'D':
-		i.events <- &Event{Command: command.CursorLeft}
+		i.events <- &Event{Key: Left}
 		return nil
 
 	case 'O':
@@ -128,9 +125,9 @@ func (i *Reader) parseEscapeSequence() error {
 			return nil
 		default:
 			// No match.
-			i.events <- &Event{Command: command.Insert, Rune: r1}
-			i.events <- &Event{Command: command.Insert, Rune: r2}
-			i.events <- &Event{Command: command.Insert, Rune: r3}
+			i.events <- &Event{Rune: r1}
+			i.events <- &Event{Rune: r2}
+			i.events <- &Event{Rune: r3}
 			return nil
 		}
 	}
@@ -142,31 +139,31 @@ func (i *Reader) parseEscapeSequence() error {
 	}
 	switch {
 	case r2 == '1' && r3 == '~':
-		i.events <- &Event{Command: command.Home}
+		i.events <- &Event{Key: Home}
 		return nil
 	case r2 == '2' && r3 == '~':
-		i.events <- &Event{Command: command.Insert}
+		i.events <- &Event{Key: Insert}
 		return nil
 	case r2 == '3' && r3 == '~':
-		i.events <- &Event{Command: command.Delete}
+		i.events <- &Event{Rune: Delete}
 		return nil
 	case r2 == '4' && r3 == '~':
-		i.events <- &Event{Command: command.End}
+		i.events <- &Event{Key: End}
 		return nil
 	case r2 == '5' && r3 == '~':
-		i.events <- &Event{Command: command.PageUp}
+		i.events <- &Event{Key: PageUp}
 		return nil
 	case r2 == '6' && r3 == '~':
-		i.events <- &Event{Command: command.PageDown}
+		i.events <- &Event{Key: PageDown}
 		return nil
 	case r2 == '7' && r3 == '~':
-		i.events <- &Event{Command: command.Home}
+		i.events <- &Event{Key: Home}
 		return nil
 	case r2 == '8' && r3 == '~':
-		i.events <- &Event{Command: command.End}
+		i.events <- &Event{Key: End}
 		return nil
 	case r2 == '9' && r3 == '~':
-		i.events <- &Event{Command: command.End}
+		i.events <- &Event{Key: End}
 		return nil
 	}
 
@@ -211,10 +208,10 @@ func (i *Reader) parseEscapeSequence() error {
 	}
 
 	// No match.
-	i.events <- &Event{Command: command.Insert, Rune: r1}
-	i.events <- &Event{Command: command.Insert, Rune: r2}
-	i.events <- &Event{Command: command.Insert, Rune: r3}
-	i.events <- &Event{Command: command.Insert, Rune: r4}
+	i.events <- &Event{Rune: r1}
+	i.events <- &Event{Rune: r2}
+	i.events <- &Event{Rune: r3}
+	i.events <- &Event{Rune: r4}
 
 	return nil
 }
