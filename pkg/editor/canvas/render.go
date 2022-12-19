@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/mattn/go-runewidth"
+
 	"code.dwrz.net/src/pkg/color"
 	"code.dwrz.net/src/pkg/editor/buffer"
 	"code.dwrz.net/src/pkg/editor/message"
 	"code.dwrz.net/src/pkg/terminal"
-	"github.com/mattn/go-runewidth"
 )
 
 func (c *Canvas) Render(b *buffer.Buffer, msg *message.Message) error {
