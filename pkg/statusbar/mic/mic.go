@@ -1,6 +1,7 @@
 package mic
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -16,9 +17,9 @@ func (b *Block) Name() string {
 	return "mic"
 }
 
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command(
-		"pactl", "get-source-mute", "@DEFAULT_SOURCE@",
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(
+		ctx, "pactl", "get-source-mute", "@DEFAULT_SOURCE@",
 	).Output()
 	if err != nil {
 		return "", fmt.Errorf("exec pactl failed: %v", err)

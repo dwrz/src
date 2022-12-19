@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"fmt"
 	"net"
 )
@@ -17,7 +18,7 @@ func (b *Block) Name() string {
 	return "eth"
 }
 
-func (b *Block) Render() (string, error) {
+func (b *Block) Render(ctx context.Context) (string, error) {
 	iface, err := net.InterfaceByName(b.iface)
 	if err != nil {
 		if err.Error() == "route ip+net: no such network interface" {

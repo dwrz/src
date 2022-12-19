@@ -1,6 +1,7 @@
 package datetime
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -34,8 +35,8 @@ func (b *Block) Name() string {
 	return "datetime"
 }
 
-func (b *Block) Render() (string, error) {
-	cmd := exec.Command("date", b.format)
+func (b *Block) Render(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, "date", b.format)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TZ=%s", b.timezone))
 
 	out, err := cmd.Output()

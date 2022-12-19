@@ -1,6 +1,7 @@
 package light
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -16,8 +17,8 @@ func (b *Block) Name() string {
 	return "light"
 }
 
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command("brightnessctl", "-m").Output()
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "brightnessctl", "-m").Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to exec: %v", err)
 	}

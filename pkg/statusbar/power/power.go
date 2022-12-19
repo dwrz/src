@@ -2,6 +2,7 @@ package power
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"math"
 	"os"
@@ -25,7 +26,7 @@ func (b *Block) Name() string {
 	return "power"
 }
 
-func (b *Block) Render() (string, error) {
+func (b *Block) Render(ctx context.Context) (string, error) {
 	// Get the power supplies.
 	var supplies []string
 

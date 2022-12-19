@@ -1,6 +1,7 @@
 package volume
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -16,9 +17,9 @@ func (b *Block) Name() string {
 	return "volume"
 }
 
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command(
-		"pactl", "get-sink-mute", "@DEFAULT_SINK@",
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(
+		ctx, "pactl", "get-sink-mute", "@DEFAULT_SINK@",
 	).Output()
 	if err != nil {
 		return "", fmt.Errorf("exec pactl failed: %v", err)

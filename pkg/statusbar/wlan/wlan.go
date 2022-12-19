@@ -3,6 +3,7 @@ package wlan
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -19,8 +20,10 @@ func (b *Block) Name() string {
 }
 
 // TODO: signal strength icon.
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command("iwctl", "station", "wlan0", "show").Output()
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(
+		ctx, "iwctl", "station", "wlan0", "show",
+	).Output()
 	if err != nil {
 		return "", fmt.Errorf("exec iwctl failed: %v", err)
 	}

@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -17,10 +18,10 @@ func (b *Block) Name() string {
 	return "memory"
 }
 
-func (b *Block) Render() (string, error) {
+func (b *Block) Render(ctx context.Context) (string, error) {
 	var output strings.Builder
 
-	out, err := exec.Command("free", "-m").Output()
+	out, err := exec.CommandContext(ctx, "free", "-m").Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to exec: %v", err)
 	}

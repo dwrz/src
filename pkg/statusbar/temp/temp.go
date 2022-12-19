@@ -1,6 +1,7 @@
 package temp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -16,8 +17,8 @@ func (b *Block) Name() string {
 	return "temp"
 }
 
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command("sensors", "-j").Output()
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "sensors", "-j").Output()
 	if err != nil {
 		return "", fmt.Errorf("exec sensors failed: %v", err)
 	}

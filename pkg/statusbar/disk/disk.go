@@ -1,6 +1,7 @@
 package disk
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -18,8 +19,8 @@ func (b *Block) Name() string {
 	return "disk"
 }
 
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command("df", "-h").Output()
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "df", "-h").Output()
 	if err != nil {
 		return "", fmt.Errorf("exec df failed: %v", err)
 	}

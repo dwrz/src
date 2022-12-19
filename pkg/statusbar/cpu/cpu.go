@@ -1,6 +1,7 @@
 package cpu
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -19,7 +20,7 @@ func (b *Block) Name() string {
 	return "cpu"
 }
 
-func (b *Block) Render() (string, error) {
+func (b *Block) Render(ctx context.Context) (string, error) {
 	out, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("failed to read %s: %v", path, err)

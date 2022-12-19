@@ -1,16 +1,18 @@
 package statusbar
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"code.dwrz.net/src/pkg/log"
 )
 
 type Block interface {
 	Name() string
-	Render() (string, error)
+	Render(ctx context.Context) (string, error)
 }
 
 type Parameters struct {
@@ -26,15 +28,17 @@ type StatusBar struct {
 	sep    string
 }
 
-func (s *StatusBar) Render() string {
+func (s *StatusBar) Render(ctx context.Context) string {
 	defer s.b.Reset()
 
 	fmt.Fprintf(s.b, "%s ", s.sep)
 
 	var (
-		outputs = make([]string, len(s.blocks))
-		wg      sync.WaitGroup
+		timeout, cancel = context.WithTimeout(ctx, 100*time.Millisecond)
+		outputs         = make([]string, len(s.blocks))
+		wg              sync.WaitGroup
 	)
+	defer cancel()
 
 	wg.Add(len(s.blocks))
 
@@ -42,7 +46,7 @@ func (s *StatusBar) Render() string {
 		go func(i int, b Block) {
 			defer wg.Done()
 
-			text, err := b.Render()
+			text, err := b.Render(timeout)
 			if err != nil {
 				s.l.Error.Printf(
 					"failed to render %s: %v",

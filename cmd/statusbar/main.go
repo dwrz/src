@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -29,7 +30,10 @@ var once = flag.Bool("once", false, "print output once")
 func main() {
 	flag.Parse()
 
-	var l = log.New(os.Stderr)
+	var (
+		ctx = context.Background()
+		l   = log.New(os.Stderr)
+	)
 
 	// Setup workspace and log file.
 	cdir, err := os.UserCacheDir()
@@ -99,7 +103,7 @@ func main() {
 	})
 
 	// Initial print.
-	fmt.Println(bar.Render())
+	fmt.Println(bar.Render(ctx))
 	if *once {
 		os.Exit(0)
 	}
@@ -110,7 +114,7 @@ func main() {
 		select {
 		case <-ticker.C:
 			// now := time.Now()
-			fmt.Println(bar.Render())
+			fmt.Println(bar.Render(ctx))
 			// fmt.Println(time.Since(now))
 		}
 	}

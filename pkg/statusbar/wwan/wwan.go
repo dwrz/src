@@ -3,6 +3,7 @@ package wwan
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 	"os/exec"
@@ -24,8 +25,8 @@ func (b *Block) Name() string {
 
 // TODO: signal strength icon.
 // TODO: get IP address (net.Interfaces).
-func (b *Block) Render() (string, error) {
-	out, err := exec.Command("mmcli", "--list-modems").Output()
+func (b *Block) Render(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "mmcli", "--list-modems").Output()
 	if err != nil {
 		return "", fmt.Errorf("exec mmcli failed: %v", err)
 	}
@@ -36,8 +37,8 @@ func (b *Block) Render() (string, error) {
 	}
 	modem := path.Base(fields[0])
 
-	out, err = exec.Command(
-		"mmcli", "-m", modem, "--output-keyvalue",
+	out, err = exec.CommandContext(
+		ctx, "mmcli", "-m", modem, "--output-keyvalue",
 	).Output()
 	if err != nil {
 		return "", fmt.Errorf("exec mmcli failed: %v", err)
