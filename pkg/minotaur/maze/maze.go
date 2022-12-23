@@ -101,7 +101,6 @@ type RenderParameters struct {
 func (m *Maze) Render(p RenderParameters) []byte {
 	var buf bytes.Buffer
 
-	buf.WriteString(terminal.CursorHide)
 	buf.WriteString(terminal.CursorTopLeft)
 
 	// Print the top wall.

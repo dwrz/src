@@ -104,7 +104,6 @@ func (g *Game) Run(ctx context.Context) error {
 
 	// TODO: refactor to use a terminal output package.
 	g.out.WriteString(terminal.ClearScreen)
-	g.out.WriteString(terminal.CursorTopLeft)
 	g.out.WriteString(terminal.CursorHide)
 	g.render()
 
