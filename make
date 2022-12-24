@@ -24,7 +24,7 @@ all() {
 }
 
 build() {
-  local cmd="$1"
+  cmd="$1"
 
   go build \
      -ldflags "${LDFLAGS}" \
@@ -57,7 +57,7 @@ lint() {
 }
 
 run() {
-  local cmd="$1"
+  cmd="$1"
 
   build "${cmd}"
 
@@ -65,8 +65,8 @@ run() {
 }
 
 main() {
-  local action="$1";
-  if [ ! -z "${action}" ]; then
+  action="$1";
+  if [ -n "${action}" ]; then
     shift;
   fi
 
