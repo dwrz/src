@@ -58,6 +58,25 @@ type Parameters struct {
 }
 
 func New(p Parameters) (*Game, error) {
+	// Account for two spaces per cell; horizontal passages and walls.
+	// Account an extra row for the right wall.
+	if p.Width%4 == 0 {
+		p.Width -= 1
+	}
+	p.Width /= 4
+
+	// Account extra rows for vertical passages and walls.
+	if p.Height%2 == 0 {
+		p.Height -= 1
+	}
+	p.Height /= 2
+
+	// If either the terminal width or height are zero,
+	// then the terminal is too small to render the maze.
+	if p.Height == 0 || p.Width == 0 {
+		return nil, fmt.Errorf("terminal too small")
+	}
+
 	var g = &Game{
 		errs:     make(chan error),
 		events:   make(chan *input.Event),

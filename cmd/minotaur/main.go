@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	height = flag.Int("h", 2, "height")
-	width  = flag.Int("w", 2, "width")
+	height = flag.Int("h", 0, "height")
+	width  = flag.Int("w", 0, "width")
 	tick   = flag.Int("t", 250, "ms between minotaur movement")
 )
 
@@ -25,10 +25,10 @@ func main() {
 
 	// Parse flags.
 	flag.Parse()
-	if *height <= 0 {
+	if *height < 0 {
 		l.Error.Fatalf("invalid height: %d", *height)
 	}
-	if *width <= 0 {
+	if *width < 0 {
 		l.Error.Fatalf("invalid width: %d", *width)
 	}
 	if *tick <= 0 {
@@ -61,6 +61,19 @@ func main() {
 	t, err := terminal.New(os.Stdin.Fd())
 	if err != nil {
 		l.Error.Fatalf("failed to get terminal attributes: %v", err)
+	}
+	size, err := t.Size()
+	if err != nil {
+		l.Error.Fatalf("failed to get terminal size: %v", err)
+	}
+	// If no dimensions were provided, use the terminal size.
+	if *height == 0 {
+		rows := int(size.Rows)
+		height = &rows
+	}
+	if *width == 0 {
+		cols := int(size.Columns)
+		width = &cols
 	}
 
 	// TODO: refactor; handle sigwinch.
